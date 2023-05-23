@@ -1,0 +1,752 @@
+---
+openapi: "3.0.3"
+info:
+  title: "VK API"
+  description: "Здесь представлена песочника для тестирования запросов API.\nВсе з\
+    апросы действуют от лица авторизованного пользователь соцсети."
+  contact:
+    name: "Илья Ситников"
+    email: "sitnikovik@yandex.ru"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+  version: "0.0.1"
+servers:
+- url: "https://petstore3.swagger.io/api/v3"
+tags:
+- name: "Users"
+  description: "Операции, связанные с анкетами пользователей"
+- name: "Friends"
+  description: "Операции, связанные с добавлением и удалением в друзьей из аккаунт\
+    а"
+- name: "Posts"
+  description: "Операции, связанные с публикацией постов"
+- name: "Media"
+  description: "Операции публикации контента"
+- name: "Chat"
+  description: "Операции, связанные с диалогами и чатами пользователей"
+- name: "Messages"
+  description: "Операции, связанные с сообщениями в чатах"
+paths:
+  /user/{id}:
+    get:
+      tags:
+      - "Users"
+      summary: "Просмотр анкеты пользователя"
+      description: ""
+      operationId: "getUserById"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The name that needs to be fetched. Use user1 for testing. "
+        required: true
+        schema:
+          type: "integer"
+          format: "uint64"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: "Invalid username supplied"
+        "404":
+          description: "User not found"
+  /user/{userId}/wall:
+    get:
+      tags:
+      - "Users"
+      summary: "Просмотр ленты пользователя по его идентификатору"
+      operationId: "getUserWall"
+      parameters:
+      - name: "userId"
+        in: "path"
+        description: "Идентификатор пользователя запрашиваемой ленты постов"
+        required: true
+        schema:
+          type: "integer"
+          format: "uint64"
+      - name: "offset"
+        in: "query"
+        required: false
+        description: "Количество объектов, которые необходимо пропустить перед нач\
+          алом возврата объектов из запроса."
+        schema:
+          type: "integer"
+          format: "uint"
+      - name: "limit"
+        in: "query"
+        required: false
+        description: "Максимальное количество объектов в выдаче"
+        schema:
+          type: "integer"
+          format: "uint"
+          example: 20
+      responses:
+        "200":
+          description: "Успешный сценарий"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Post"
+        "403":
+          description: "Лента недоступна от просмотра"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+              example:
+                code: 403004
+                message: "У вас нет доступа к просмотру ленты этого пользователя"
+  /friend:
+    get:
+      tags:
+      - "Friends"
+      summary: "Просмотр друзей пользователей"
+      operationId: "getFriends"
+      parameters:
+      - name: "offset"
+        in: "query"
+        required: false
+        description: "Количество объектов, которые необходимо пропустить перед нач\
+          алом возврата объектов из запроса."
+        schema:
+          type: "integer"
+          format: "uint"
+      - name: "limit"
+        in: "query"
+        required: false
+        description: "Максимальное количество объектов в выдаче"
+        schema:
+          type: "integer"
+          format: "uint"
+          example: 100
+      - name: "isOnline"
+        in: "query"
+        required: false
+        description: "Флаг онлайн/офлайн"
+        schema:
+          type: "boolean"
+      - name: "fields"
+        in: "query"
+        description: "Перечислите необходимые необязательные поля объекта пользова\
+          теля"
+        required: false
+        example:
+        - "isOnline"
+        - "thumbUrl"
+        schema:
+          type: "array"
+          items:
+            type: "string"
+      responses:
+        "200":
+          description: "Успешный сценарий"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Friend"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Friend"
+      security:
+      - petstore_auth:
+        - "write:pets"
+        - "read:pets"
+  /friend/{id}:
+    put:
+      tags:
+      - "Friends"
+      summary: "Добавление пользователя в друзья"
+      operationId: "createFriendById"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Идентификатор пользователя, которого нужно добавить в друзья"
+        required: true
+        schema:
+          type: "integer"
+          format: "uint64"
+          example: 100500
+      - name: "message"
+        in: "query"
+        description: "Идентификатор пользователя, которого нужно добавить в друзья"
+        required: false
+        schema:
+          type: "string"
+          example: "Привет! Учимся с тобой на одном потоке! Го дружить?"
+      responses:
+        "200":
+          description: "Успешный сценарий"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+              example:
+                code: 0
+                message: "Заявка в друзья отправлена"
+        "403":
+          description: "Нельзя добавить в друзья"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+              example:
+                code: 403001
+                message: "Пользователь ограничил круг лиц на добавление в друзья"
+        "404":
+          description: "Пользователь не найден"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+              example:
+                code: 404001
+                message: "Пользователь c таким id не найден"
+    delete:
+      tags:
+      - "Friends"
+      summary: "Удаление пользователя из друзей. Если пользователь еще не принял з\
+        аявку в друзья - она будет отменена"
+      operationId: "deleteFriendById"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Перечислите необходимые необязательные поля объекта пользова\
+          теля"
+        required: true
+        schema:
+          type: "integer"
+          format: "uint64"
+          example: 100500
+      responses:
+        "200":
+          description: "Успешный сценарий"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+              example:
+                code: 0
+                message: "Пользователь успешно удален из друзей"
+        "404":
+          description: "Пользователь не найден"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+              example:
+                code: 404001
+                message: "Пользователь c таким id не найден"
+      security:
+      - petstore_auth:
+        - "write:pets"
+        - "read:pets"
+  /friend/{id}/claim-status:
+    get:
+      tags:
+      - "Friends"
+      summary: "Узнать статус заявки в друзья"
+      operationId: "getFriendClaimStatusById"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Идентификатор пользователя запрашиваемой заявки в друзья"
+        required: true
+        schema:
+          type: "integer"
+          format: "uint64"
+      responses:
+        "200":
+          description: "Успешный сценарий"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FriendClaimStatus"
+              examples:
+                Заявка создана:
+                  value:
+                    status: "created"
+                    createdAt: 1684670874
+                    updatedAt: null
+                Заявка принята:
+                  value:
+                    status: "accepted"
+                    createdAt: 1684670874
+                    updatedAt: 1684670936
+                Заявка отклонена:
+                  value:
+                    status: "declined"
+                    createdAt: 1684670874
+                    updatedAt: 1684670936
+        "404":
+          description: "Пользователь или заявка не найдены"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+              examples:
+                Пользователь не найден:
+                  value:
+                    code: 404001
+                    message: "Пользователь с таким id не найден"
+                Заявка не найдена:
+                  value:
+                    code: 404002
+                    message: "Не найдено заявки в друзья этому пользователю"
+  /post:
+    put:
+      tags:
+      - "Posts"
+      summary: "Публикация поста"
+      parameters:
+      - name: "userId"
+        in: "query"
+        description: "Идентификатор пользователя, в профиль которого публикуем пос\
+          т"
+        schema:
+          type: "integer"
+          format: "uint64"
+      - name: "message"
+        in: "query"
+        description: "Текстовое сообщение"
+        example: "Привет, друг. На связи Элиот."
+      - name: "mediaIds"
+        in: "query"
+        description: "Список идентификаторов медиафайлов (файлы уже должны быть за\
+          гружены в систему). Если контент не в  истеме ВК - вы можете просто доба\
+          вть ссылки на нужный контент в текст поста."
+        example:
+        - 100500
+        - 900000
+        schema:
+          type: "array"
+          items:
+            type: "integer"
+            format: "uint64"
+      responses:
+        "200":
+          description: "Успешный сценарий. Публикация поста успешно проведена."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdResponse"
+              example:
+                id: 100500
+  /media/upload:
+    put:
+      tags:
+      - "Media"
+      summary: "Загрузка медиа-контента"
+      operationId: "postMediaUpload"
+      parameters:
+      - name: "content"
+        in: "query"
+        description: "Содержимое контента в кодировке base64"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "Успешный сценарий. Вернет объект с идентификатором загруже\
+            нного файла и ссылкой на него"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaUploaded"
+              example:
+                id: 100500
+                url: "https://i.pinimg.com/originals/64/02/e1/6402e1690690cfa0bce59ebc77f844b7.jpg"
+  /feed:
+    get:
+      tags:
+      - "Feed"
+      summary: "Лента новостей авторизованного пользователя"
+      parameters:
+      - name: "offset"
+        in: "query"
+        required: false
+        description: "Количество постов, которые необходимо пропустить"
+        schema:
+          type: "integer"
+          format: "uint"
+      - name: "limit"
+        in: "query"
+        required: false
+        description: "Максимальное количество постов в выдаче"
+        schema:
+          type: "integer"
+          format: "uint"
+          example: 100
+      responses:
+        "200":
+          description: "Успешный сценарий"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Post"
+  /chat/{id}:
+    get:
+      tags:
+      - "Chat"
+      summary: "Просмотр информации о чате"
+      operationId: "getChatById"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Идентификатор чата"
+        schema:
+          type: "integer"
+          format: "uint64"
+          example: 100500
+      - name: "messagesOffset"
+        in: "path"
+        description: "Пропустить кол-во сообщений в выдаче. Сортировка с по убыван\
+          ию."
+        schema:
+          type: "integer"
+          format: "uint8"
+          example: 100
+      - name: "messagesLimit"
+        in: "path"
+        description: "Максимальное кол-во сообщений в выдаче. Сортировка с по убыв\
+          анию."
+        schema:
+          type: "integer"
+          format: "uint8"
+          example: 100
+      responses:
+        "200":
+          description: "Успешный сценарий"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chat"
+  /message/get/{id}:
+    get:
+      tags:
+      - "Messages"
+      summary: "Получение информации о сообщении по идентификатору"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "integer"
+          format: "uint64"
+          example: 100500
+          description: "Идентификатор сообщения"
+      responses:
+        "200":
+          description: "Успешный сценарий"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "404":
+          description: "Сообщение не найдено"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+              example:
+                code: 404003
+                message: "Сообщение не найдено"
+  /message/send:
+    post:
+      tags:
+      - "Messages"
+      summary: "Отправить сообщение в чат"
+      parameters:
+      - name: "chatId"
+        in: "query"
+        required: true
+        description: "Идентификатор чата, куда нужно отправить сообщение"
+        schema:
+          type: "integer"
+          format: "uint64"
+          example: 100500
+      - name: "text"
+        in: "query"
+        description: "Текст сообщения"
+        schema:
+          type: "string"
+          example: "Привет, друг. На связи Элиот."
+      - name: "mediaIds"
+        in: "query"
+        description: "Список идентификаторов медиафайлов (файлы уже должны быть за\
+          гружены в систему). Если контент не в  истеме ВК - вы можете просто доба\
+          вть ссылки на нужный контент в текст поста."
+        example:
+        - 100500
+        - 900000
+        schema:
+          type: "array"
+          items:
+            type: "integer"
+            format: "uint64"
+      responses:
+        "200":
+          description: "Успешный сценарий"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdResponse"
+              example:
+                id: 123132
+components:
+  securitySchemes:
+    api_key:
+      type: "apiKey"
+      name: "Authorization"
+      in: "header"
+  schemas:
+    User:
+      type: "object"
+      required:
+      - "id"
+      properties:
+        id:
+          type: "string"
+          example: 100500
+        username:
+          type: "string"
+          example: "vans1020"
+        firstName:
+          type: "string"
+          example: "Иван"
+        lastName:
+          type: "string"
+          example: "Иванов"
+        avatarUrl:
+          type: "string"
+          nullable: true
+          example: "https://i.pinimg.com/originals/a6/9a/42/a69a4248fbeebeee4c850421340dcb19.png"
+        isOnline:
+          type: "boolean"
+          example: true
+        lastOnlineAt:
+          type: "integer"
+          format: "uint64"
+          example: 1684731842
+        dateOfBirth:
+          type: "integer"
+          format: "uint64"
+          example: 1684731842
+        email:
+          type: "string"
+          nullable: true
+          example: "vans1020@mail.ru"
+        phone:
+          type: "string"
+          nullable: true
+          example: "+79161234567"
+    Post:
+      type: "object"
+      required:
+      - "id"
+      properties:
+        id:
+          type: "integer"
+          format: "uint64"
+          description: "Идентификатор поста"
+          example: 100500
+        text:
+          type: "string"
+          description: "Текст поста"
+          example: "Привет друг. На связи Элиот."
+        createdAt:
+          type: "integer"
+          format: "uint64"
+          description: "Дата создания поста"
+          example: 1684786369
+        updatedAt:
+          type: "integer"
+          format: "uint64"
+          example: 1684786369
+          description: "Дата изменения поста"
+        postSubjectId:
+          type: "integer"
+          format: "uint8"
+          example: 3
+          description: "Идентификатор тематики поста. 3 - автомобили"
+        likesCount:
+          type: "integer"
+          format: "uint64"
+          example: 123
+          description: "Количество лайков"
+        watchesCount:
+          type: "integer"
+          format: "uint64"
+          example: 567
+          description: "Количество просмотров"
+        media:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/MediaUploaded"
+    MediaUploaded:
+      type: "object"
+      required:
+      - "id"
+      - "url"
+      properties:
+        id:
+          type: "integer"
+          format: "uint16"
+          description: "Идентификатор загруженного файла"
+          example: 100500
+        url:
+          type: "string"
+          example: "https://i.pinimg.com/originals/64/02/e1/6402e1690690cfa0bce59ebc77f844b7.jpg"
+          description: "Внешняя ссылка на загруженный файл"
+    ApiResponse:
+      type: "object"
+      required:
+      - "code"
+      - "message"
+      properties:
+        code:
+          type: "integer"
+          format: "uint16"
+          description: "Идентификатор ошибки в документации. При успешном запросе\
+            \ равно нулю."
+        message:
+          type: "string"
+          description: "Краткое описание ответа"
+    Friend:
+      required:
+      - "username"
+      type: "object"
+      properties:
+        username:
+          type: "uint64"
+          example: 100500
+          description: "Идентификатор пользователя в сети ВКонтакте"
+        firstName:
+          type: "string"
+          example: "Иван"
+          description: "Имя пользователя"
+        lastName:
+          type: "string"
+          example: "Иванов"
+          description: "Фамилия пользователя"
+        nickname:
+          type: "string"
+          nullable: true
+          example: "vans1020"
+          description: "Уникальный идентификатор пользователя в сети ВКонтакте. Мо\
+            жно использовать для поиска страницы по URL вместо id (htts://vk.com/vans1020)\
+            \ или для упоминания в комментриях через `@`."
+        thumbUrl:
+          type: "string"
+          nullable: true
+          example: "https://i.pinimg.com/originals/a6/9a/42/a69a4248fbeebeee4c850421340dcb19.png"
+          description: "Ссылка на фото аватара пользователя"
+        isOnline:
+          type: "boolean"
+          example: true
+          description: "Флаг того, что пользователь сейчас онлайн"
+      xml:
+        name: "friend"
+    FriendClaimStatus:
+      type: "object"
+      properties:
+        status:
+          type: "string"
+          description: "Статус заявки в друзья"
+          example: "created"
+          enum:
+          - "created"
+          - "accepted"
+          - "declined"
+        createdAt:
+          type: "integer"
+          description: "Временная метка даты создания заявки"
+          example: 1684670649
+        updatedAt:
+          type: "integer"
+          nullable: true
+          description: "Временная метка даты принятия/отклонения заявки"
+          example: 1684670649
+    IdResponse:
+      type: "object"
+      required:
+      - "id"
+      properties:
+        id:
+          type: "integer"
+          format: "uint16"
+          description: "Идентификатор объекта"
+    Chat:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "uint64"
+          description: "Идентификатор чата"
+          example: 100500
+        userIds:
+          type: "array"
+          description: "Идентификатор пользователей, участвующие в чате. Если в сп\
+            иске только один иденнтификатор - чат считатется как личные сообщения"
+          items:
+            type: "integer"
+            format: "uint64"
+            example: 100500
+        messages:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Message"
+        lastMessageSentAt:
+          type: "integer"
+          format: "uint64"
+          description: "Время отправки последнего сообщения"
+          example: 1684786784
+    Message:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "uint64"
+          description: "Идентификатор сообщения"
+          example: 100500
+        chatId:
+          type: "integer"
+          format: "uint64"
+          description: "Идентификатор чата"
+          example: 100500
+        text:
+          type: "string"
+          description: "Текст сообщения"
+          example: "Привет, друг. На связи Элиот."
+        isEdited:
+          type: "boolean"
+          description: "Флаг редактирования текста сообщения"
+        media:
+          type: "array"
+          description: "Список прикрепленных медиа-файлов"
+          items:
+            $ref: "#/components/schemas/MediaUploaded"
+        createdAt:
+          type: "integer"
+          nullable: true
+          format: "uint64"
+          example: 1684786369
+          description: "Дата создания"
+        seenAt:
+          type: "integer"
+          nullable: true
+          format: "uint64"
+          example: 1684786369
+          description: "Дата прочтения"

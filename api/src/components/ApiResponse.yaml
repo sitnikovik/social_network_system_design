@@ -1,0 +1,12 @@
+type: object
+required:
+  - code
+  - message
+properties:
+  code:
+    type: integer
+    format: uint16
+    description: "Идентификатор ошибки в документации. При успешном запросе равно нулю."
+  message:
+    type: string
+    description: "Краткое описание ответа"

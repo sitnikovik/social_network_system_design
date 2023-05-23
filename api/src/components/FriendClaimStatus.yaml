@@ -1,0 +1,19 @@
+type: object
+properties:
+  status:
+    type: string
+    description: "Статус заявки в друзья"
+    example: "created"
+    enum:
+      - "created"
+      - "accepted"
+      - "declined"
+  createdAt:
+    type: integer
+    description: "Временная метка даты создания заявки"
+    example: 1684670649
+  updatedAt:
+    type: integer
+    nullable: true
+    description: "Временная метка даты принятия/отклонения заявки"
+    example: 1684670649

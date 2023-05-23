@@ -1,0 +1,32 @@
+required:
+  - username
+type: object
+properties:
+  username:
+    type: uint64
+    example: 100500
+    description: Идентификатор пользователя в сети ВКонтакте
+  firstName:
+    type: string
+    example: Иван
+    description: Имя пользователя
+  lastName:
+    type: string
+    example: Иванов
+    description: Фамилия пользователя
+  nickname:
+    type: string
+    nullable: true
+    example: "vans1020"
+    description: "Уникальный идентификатор пользователя в сети ВКонтакте. Можно использовать для поиска страницы по URL вместо id (htts://vk.com/vans1020) или для упоминания в комментриях через `@`."
+  thumbUrl:
+    type: string
+    nullable: true
+    example: "https://i.pinimg.com/originals/a6/9a/42/a69a4248fbeebeee4c850421340dcb19.png"
+    description: "Ссылка на фото аватара пользователя"
+  isOnline:
+    type: boolean
+    example: true
+    description: "Флаг того, что пользователь сейчас онлайн"
+xml:
+  name: friend
