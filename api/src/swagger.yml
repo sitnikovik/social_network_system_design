@@ -5,7 +5,6 @@ info:
   description: |-
     Здесь представлена песочника для тестирования запросов API.
     Все запросы действуют от лица авторизованного пользователь соцсети.
-
   contact:
     name: "Илья Ситников"
     email: sitnikovik@yandex.ru
@@ -49,9 +48,6 @@ paths:
           description: successful operation
           content:
             application/json:
-              schema:
-                $ref: 'components/User.yaml'
-            application/xml:
               schema:
                 $ref: 'components/User.yaml'
         '400':
@@ -153,9 +149,6 @@ paths:
                 type: array
                 items:
                   $ref: 'components/Friend.yaml'
-            application/xml:
-              schema:
-                $ref: 'components/Friend.yaml'
       security:
         - petstore_auth:
             - write:pets
@@ -425,37 +418,7 @@ paths:
             application/json:
               schema:
                 $ref: "components/Chat.yaml"
-  /message/get/{id}:
-    get:
-      tags:
-        - Messages
-      summary: "Получение информации о сообщении по идентификатору"
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: uint64
-            example: 100500
-            description: "Идентификатор сообщения"
-      responses:
-        200:
-          description: "Успешный сценарий"
-          content:
-            application/json:
-              schema:
-                $ref: "components/Message.yaml"
-        404:
-          description: "Сообщение не найдено"
-          content:
-            application/json:
-              schema:
-                $ref: "components/ApiResponse.yaml"
-              example:
-                code: 404003
-                message: "Сообщение не найдено"
-  /message/send:
+  /message:
     post:
       tags:
         - Messages
