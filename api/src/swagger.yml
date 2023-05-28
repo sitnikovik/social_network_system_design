@@ -49,7 +49,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'components/User.yaml'
+                $ref: 'components/response/User.yaml'
         '400':
           description: Invalid username supplied
         '404':
@@ -91,13 +91,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "components/Post.yaml"
+                  $ref: "components/response/Post.yaml"
         403:
           description: "Лента недоступна от просмотра"
           content:
             application/json:
               schema:
-                $ref: "components/ApiResponse.yaml"
+                $ref: "components/response/ApiResponse.yaml"
               example:
                 code: 403004
                 message: "У вас нет доступа к просмотру ленты этого пользователя"
@@ -148,7 +148,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: 'components/Friend.yaml'
+                  $ref: 'components/response/Friend.yaml'
       security:
         - petstore_auth:
             - write:pets
@@ -181,7 +181,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "components/ApiResponse.yaml"
+                $ref: "components/response/ApiResponse.yaml"
               example:
                   code: 0
                   message: "Заявка в друзья отправлена"
@@ -190,7 +190,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "components/ApiResponse.yaml"
+                $ref: "components/response/ApiResponse.yaml"
               example:
                   code: 403001
                   message: "Пользователь ограничил круг лиц на добавление в друзья"
@@ -199,7 +199,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "components/ApiResponse.yaml"
+                $ref: "components/response/ApiResponse.yaml"
               example:
                   code: 404001
                   message: "Пользователь c таким id не найден"
@@ -223,7 +223,7 @@ paths:
           content: 
             application/json:
               schema:
-                $ref: "components/ApiResponse.yaml"
+                $ref: "components/response/ApiResponse.yaml"
               example:
                 code: 0
                 message: "Пользователь успешно удален из друзей"
@@ -232,7 +232,7 @@ paths:
           content: 
             application/json:
               schema:
-                $ref: "components/ApiResponse.yaml"
+                $ref: "components/response/ApiResponse.yaml"
               example:
                   code: 404001
                   message: "Пользователь c таким id не найден"
@@ -261,7 +261,7 @@ paths:
           content: 
             application/json:
               schema:
-                $ref: "components/FriendClaimStatus.yaml"
+                $ref: "components/response/FriendClaimStatus.yaml"
               examples:
                 Заявка создана:
                   value:
@@ -283,7 +283,7 @@ paths:
           content: 
             application/json:
               schema:
-                $ref: "components/ApiResponse.yaml"
+                $ref: "components/response/ApiResponse.yaml"
               examples:
                 "Пользователь не найден":
                   value: 
@@ -297,37 +297,20 @@ paths:
     put:
       tags:
         - Posts
+      operationId: createPost
       summary: "Публикация поста"
-      parameters:
-        - name: userId
-          in: query
-          description: "Идентификатор пользователя, в профиль которого публикуем пост"
-          schema:
-            type: integer
-            format: uint64
-        - name: message
-          in: query
-          description: "Текстовое сообщение"
-          example: "Привет, друг. На связи Элиот."
-        - name: mediaIds
-          in: query
-          description: "Список идентификаторов медиафайлов (файлы уже должны быть загружены в систему). 
-          Если контент не в  истеме ВК - вы можете просто добавть ссылки на нужный контент в текст поста."
-          example:
-            - 100500
-            - 900000
-          schema:
-            type: array
-            items:
-              type: integer
-              format: uint64
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "components/request/PostRequestBody.yaml"
       responses:
         200:
           description: "Успешный сценарий. Публикация поста успешно проведена."
           content:
             application/json:
               schema:
-                $ref: "components/IdResponse.yaml"
+                $ref: "components/response/IdResponse.yaml"
               example:
                   id: 100500
   /media/upload:
@@ -349,7 +332,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "components/MediaUploaded.yaml"
+                $ref: "components/response/MediaUploaded.yaml"
               example:
                 id: 100500
                 url: "https://i.pinimg.com/originals/64/02/e1/6402e1690690cfa0bce59ebc77f844b7.jpg"
@@ -382,7 +365,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "components/Post.yaml"
+                  $ref: "components/response/Post.yaml"
   /chat/{id}:
     get:
       tags:
@@ -417,7 +400,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "components/Chat.yaml"
+                $ref: "components/response/Chat.yaml"
   /message:
     post:
       tags:
@@ -456,7 +439,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "components/IdResponse.yaml"
+                $ref: "components/response/IdResponse.yaml"
               example:
                 id: 123132
 components:
