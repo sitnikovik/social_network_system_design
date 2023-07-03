@@ -1,0 +1,116 @@
+// Users host -------------------------------
+Table users.user {
+  id integer [primary key]
+  username varchar [null]
+  first_name varchar
+  last_name varchar
+  second_name varchar [null]
+  location varchar [null]
+  created_at timestamp 
+}
+
+Table users.profile {
+  user_id integer [primary key]
+  avatarUrl varchar [null]
+  bio varchar [null]
+  interests varchar [null]
+}
+Ref: users.profile.user_id <> users.user.id
+
+
+// Posts host -------------------------------
+Table posts.post {
+  id integer [primary key]
+  user_id integer
+  subject posts.subject
+  text text
+  watches integer
+  created_at timestamp
+  updated_at timestamp [null]
+}
+Enum posts.subject {
+  1 [note: "Природа"]
+  2 [note: "Люди"]
+  3 [note: "Авто"]
+}
+Ref: posts.post.user_id > users.user.id
+
+Table posts.attachment {
+  id integer [primary key]
+  post_id integer
+  static_file_id integer
+}
+Ref: posts.attachment.post_id > posts.post.id
+Ref: posts.attachment.static_file_id > static.file.id
+
+Table posts.post_like {
+  user_id integer [primary key]
+  post_id integer [primary key]
+  created_at timestamp
+}
+Ref: posts.post_like.user_id > users.user.id
+Ref: posts.post_like.post_id > posts.post.id
+
+Table posts.attachment_like {
+  user_id integer [primary key]
+  post_id integer [primary key]
+  created_at timestamp
+}
+Ref: posts.attachment_like.user_id > users.user.id
+Ref: posts.attachment_like.post_id > posts.attachment.id
+
+// File staging hosts ----------------------
+table static.file {
+  id integer [primary key]
+  post_id integer
+  type varchar
+  content blob
+  created_at timestamp
+}
+
+// Chat and messages host ---------------------------
+Table chats.chat_member {
+  user_id integer [primary key]
+  chat_id integer [primary key]
+}
+Ref: chats.chat_member.chat_id > chats.chat.id
+Ref: chats.chat_member.user_id > users.user.id
+
+Table chats.chat {
+  id integer [primary key]
+  name varchar
+  user_id integer
+}
+
+Table chats.message {
+    id integer [primary key]
+    user_id integer
+    chat_id integer
+    reply_id integer [null]
+    text varchar // max 4096
+    is_edited bool
+    is_shown bool
+    created_at timestamp
+}
+Ref: chats.message.chat_id > chats.chat.id
+Ref: chats.message.reply_id > chats.message.id
+
+
+// Relations host ---------------------------------------
+Table relations.follower {
+  user_id integer [primary key]
+  following_id integer [primary key]
+  is_friend bool
+}
+Ref: relations.follower.user_id > users.user.id
+Ref: relations.follower.following_id > users.user.id
+
+Table relations.lover {
+  user_id integer [primary key]
+  lover_id integer [primary key]
+  status integer // tinyint
+}
+Ref: relations.lover.user_id > users.user.id
+Ref: relations.lover.lover_id > users.user.id
+
+

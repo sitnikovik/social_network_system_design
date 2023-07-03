@@ -1,0 +1,42 @@
+type: object
+required:
+  - id
+properties:
+  id:
+    type: integer
+    format: uint64
+    description: "Идентификатор поста"
+    example: 100500
+  text:
+    type: string
+    description: "Текст поста"
+    example: "Привет друг. На связи Элиот."
+  createdAt:
+    type: integer
+    format: uint64
+    description: "Дата создания поста"
+    example: 1684786369
+  updatedAt:
+    type: integer
+    format: uint64
+    example: 1684786369
+    description: "Дата изменения поста"
+  postSubjectId:
+    type: integer
+    format: uint8
+    example: 3
+    description: "Идентификатор тематики поста. 3 - автомобили"
+  likesCount:
+    type: integer
+    format: uint64
+    example: 123
+    description: "Количество лайков"
+  watchesCount:
+    type: integer
+    format: uint64
+    example: 567
+    description: "Количество просмотров"
+  media:
+    type: array
+    items:
+      $ref: "MediaUploaded.yaml"

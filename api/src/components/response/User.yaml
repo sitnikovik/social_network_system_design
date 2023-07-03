@@ -1,0 +1,39 @@
+type: object
+required:
+  - id
+properties:
+  id:
+    type: string
+    example: 100500
+  username:
+    type: string
+    example: "vans1020"
+  firstName:
+    type: string
+    example: Иван
+  lastName:
+    type: string
+    example: Иванов
+  avatarUrl:
+    type: string
+    nullable: true
+    example: "https://i.pinimg.com/originals/a6/9a/42/a69a4248fbeebeee4c850421340dcb19.png"
+  isOnline:
+    type: boolean
+    example: true
+  lastOnlineAt:
+    type: integer
+    format: uint64
+    example: 1684731842
+  dateOfBirth:
+    type: integer
+    format: uint64
+    example: 1684731842
+  email:
+    type: string
+    nullable: true
+    example: vans1020@mail.ru
+  phone:
+    type: string
+    nullable: true
+    example: '+79161234567'

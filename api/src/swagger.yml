@@ -1,0 +1,450 @@
+
+openapi: 3.0.3
+info:
+  title: VK API
+  description: |-
+    Здесь представлена песочника для тестирования запросов API.
+    Все запросы действуют от лица авторизованного пользователь соцсети.
+  contact:
+    name: "Илья Ситников"
+    email: sitnikovik@yandex.ru
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+servers:
+  - url: https://petstore3.swagger.io/api/v3
+tags:
+  - name: Users
+    description: "Операции, связанные с анкетами пользователей"
+  - name: Friends
+    description: "Операции, связанные с добавлением и удалением в друзьей из аккаунта"
+  - name: Posts
+    description: "Операции, связанные с публикацией постов"
+  - name: Media
+    description: "Операции публикации контента"
+  - name: Chat
+    description: "Операции, связанные с диалогами и чатами пользователей"
+  - name: Messages
+    description: "Операции, связанные с сообщениями в чатах"
+paths:
+  /user/{id}:
+    get:
+      tags:
+        - Users
+      summary: "Просмотр анкеты пользователя"
+      description: ''
+      operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          description: 'The name that needs to be fetched. Use user1 for testing. '
+          required: true
+          schema:
+            type: integer
+            format: uint64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'components/response/User.yaml'
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+  /user/{userId}/wall:
+    get:
+      tags:
+        - Users
+      summary: "Просмотр ленты пользователя по его идентификатору"
+      operationId: getUserWall
+      parameters:
+        - name: userId
+          in: path
+          description: "Идентификатор пользователя запрашиваемой ленты постов"
+          required: true
+          schema:
+            type: integer
+            format: uint64
+        - name: offset
+          in: query
+          required: false
+          description: "Количество объектов, которые необходимо пропустить перед началом возврата объектов из запроса."
+          schema:
+            type: integer
+            format: uint
+        - name: limit
+          in: query
+          required: false
+          description: "Максимальное количество объектов в выдаче"
+          schema:
+            type: integer
+            format: uint
+            example: 20
+      responses:
+        200:
+          description: "Успешный сценарий"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "components/response/Post.yaml"
+        403:
+          description: "Лента недоступна от просмотра"
+          content:
+            application/json:
+              schema:
+                $ref: "components/response/ApiResponse.yaml"
+              example:
+                code: 403004
+                message: "У вас нет доступа к просмотру ленты этого пользователя"
+  /friend:
+    get:
+      tags:
+        - Friends
+      summary: "Просмотр друзей пользователей"
+      operationId: getFriends
+      parameters:
+        - name: offset
+          in: query
+          required: false
+          description: "Количество объектов, которые необходимо пропустить перед началом возврата объектов из запроса."
+          schema:
+            type: integer
+            format: uint
+        - name: limit
+          in: query
+          required: false
+          description: "Максимальное количество объектов в выдаче"
+          schema:
+            type: integer
+            format: uint
+            example: 100
+        - name: isOnline
+          in: query
+          required: false
+          description: "Флаг онлайн/офлайн"
+          schema:
+            type: boolean
+        - name: fields
+          in: query
+          description: "Перечислите необходимые необязательные поля объекта пользователя"
+          required: false
+          example: 
+          - isOnline
+          - thumbUrl
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: "Успешный сценарий"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: 'components/response/Friend.yaml'
+      security:
+        - petstore_auth:
+            - write:pets
+            - read:pets
+  /friend/{id}:
+    put: 
+      tags:
+        - Friends
+      summary: "Добавление пользователя в друзья"
+      operationId: createFriendById
+      parameters:
+        - name: id
+          in: path
+          description: "Идентификатор пользователя, которого нужно добавить в друзья"
+          required: true
+          schema:
+            type: integer
+            format: uint64
+            example: 100500
+        - name: message
+          in: query
+          description: "Идентификатор пользователя, которого нужно добавить в друзья"
+          required: false
+          schema:
+            type: string
+            example: "Привет! Учимся с тобой на одном потоке! Го дружить?"
+      responses:
+        '200':
+          description: "Успешный сценарий"
+          content:
+            application/json:
+              schema:
+                $ref: "components/response/ApiResponse.yaml"
+              example:
+                  code: 0
+                  message: "Заявка в друзья отправлена"
+        '403':
+          description: "Нельзя добавить в друзья"
+          content:
+            application/json:
+              schema:
+                $ref: "components/response/ApiResponse.yaml"
+              example:
+                  code: 403001
+                  message: "Пользователь ограничил круг лиц на добавление в друзья"
+        '404':
+          description: "Пользователь не найден"
+          content:
+            application/json:
+              schema:
+                $ref: "components/response/ApiResponse.yaml"
+              example:
+                  code: 404001
+                  message: "Пользователь c таким id не найден"
+    delete: 
+      tags:
+        - Friends
+      summary: "Удаление пользователя из друзей. Если пользователь еще не принял заявку в друзья - она будет отменена"
+      operationId: deleteFriendById
+      parameters:
+        - name: id
+          in: path
+          description: "Перечислите необходимые необязательные поля объекта пользователя"
+          required: true
+          schema:
+            type: integer
+            format: uint64
+            example: 100500
+      responses:
+        '200':
+          description: "Успешный сценарий"
+          content: 
+            application/json:
+              schema:
+                $ref: "components/response/ApiResponse.yaml"
+              example:
+                code: 0
+                message: "Пользователь успешно удален из друзей"
+        '404':
+          description: "Пользователь не найден"
+          content: 
+            application/json:
+              schema:
+                $ref: "components/response/ApiResponse.yaml"
+              example:
+                  code: 404001
+                  message: "Пользователь c таким id не найден"
+      security:
+        - petstore_auth:
+            - write:pets
+            - read:pets
+            
+  /friend/{id}/claim-status:
+    get:
+      tags:
+          - Friends
+      summary: "Узнать статус заявки в друзья"
+      operationId: getFriendClaimStatusById
+      parameters:
+        - name: id
+          in: path
+          description: "Идентификатор пользователя запрашиваемой заявки в друзья"
+          required: true
+          schema:
+            type: integer
+            format: uint64
+      responses:
+        '200':
+          description: "Успешный сценарий"
+          content: 
+            application/json:
+              schema:
+                $ref: "components/response/FriendClaimStatus.yaml"
+              examples:
+                Заявка создана:
+                  value:
+                    status: "created"
+                    createdAt: 1684670874
+                    updatedAt: null
+                Заявка принята:
+                  value:
+                    status: "accepted"
+                    createdAt: 1684670874
+                    updatedAt: 1684670936
+                Заявка отклонена:
+                  value:
+                    status: "declined"
+                    createdAt: 1684670874
+                    updatedAt: 1684670936
+        '404':
+          description: "Пользователь или заявка не найдены"
+          content: 
+            application/json:
+              schema:
+                $ref: "components/response/ApiResponse.yaml"
+              examples:
+                "Пользователь не найден":
+                  value: 
+                    code: 404001
+                    message: "Пользователь с таким id не найден"
+                "Заявка не найдена":
+                  value: 
+                    code: 404002
+                    message: "Не найдено заявки в друзья этому пользователю"
+  /post:
+    put:
+      tags:
+        - Posts
+      operationId: createPost
+      summary: "Публикация поста"
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "components/request/PostRequestBody.yaml"
+      responses:
+        200:
+          description: "Успешный сценарий. Публикация поста успешно проведена."
+          content:
+            application/json:
+              schema:
+                $ref: "components/response/IdResponse.yaml"
+              example:
+                  id: 100500
+  /media/upload:
+    put:
+      tags:
+        - Media
+      summary: "Загрузка медиа-контента"
+      operationId: postMediaUpload
+      parameters:
+        - name: content
+          in: query
+          description: "Содержимое контента в кодировке base64"
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: "Успешный сценарий. Вернет объект с идентификатором загруженного файла и ссылкой на него"
+          content:
+            application/json:
+              schema:
+                $ref: "components/response/MediaUploaded.yaml"
+              example:
+                id: 100500
+                url: "https://i.pinimg.com/originals/64/02/e1/6402e1690690cfa0bce59ebc77f844b7.jpg"
+  /feed:
+    get:
+      tags:
+        - Feed
+      summary: "Лента новостей авторизованного пользователя"
+      parameters:
+        - name: offset
+          in: query
+          required: false
+          description: "Количество постов, которые необходимо пропустить"
+          schema:
+            type: integer
+            format: uint
+        - name: limit
+          in: query
+          required: false
+          description: "Максимальное количество постов в выдаче"
+          schema:
+            type: integer
+            format: uint
+            example: 100
+      responses:
+        200:
+          description: "Успешный сценарий"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "components/response/Post.yaml"
+  /chat/{id}:
+    get:
+      tags:
+        - Chat
+      summary: "Просмотр информации о чате"
+      operationId: getChatById
+      parameters:
+        - name: id
+          in: path
+          description: "Идентификатор чата"
+          schema:
+            type: integer
+            format: uint64
+            example: 100500
+        - name: messagesOffset
+          in: path
+          description: "Пропустить кол-во сообщений в выдаче. Сортировка с по убыванию."
+          schema:
+            type: integer
+            format: uint8
+            example: 100
+        - name: messagesLimit
+          in: path
+          description: "Максимальное кол-во сообщений в выдаче. Сортировка с по убыванию."
+          schema:
+            type: integer
+            format: uint8
+            example: 100
+      responses:
+        200:
+          description: "Успешный сценарий"
+          content:
+            application/json:
+              schema:
+                $ref: "components/response/Chat.yaml"
+  /message:
+    post:
+      tags:
+        - Messages
+      summary: "Отправить сообщение в чат"
+      parameters:
+        - name: chatId
+          in: query
+          required: true
+          description: "Идентификатор чата, куда нужно отправить сообщение"
+          schema:
+            type: integer
+            format: uint64
+            example: 100500
+        - name: text
+          in: query
+          description: "Текст сообщения"
+          schema:
+            type: string
+            example: "Привет, друг. На связи Элиот."
+        - name: mediaIds
+          in: query
+          description: "Список идентификаторов медиафайлов (файлы уже должны быть загружены в систему). 
+          Если контент не в  истеме ВК - вы можете просто добавть ссылки на нужный контент в текст поста."
+          example:
+            - 100500
+            - 900000
+          schema:
+            type: array
+            items:
+              type: integer
+              format: uint64
+      responses:
+        200:
+          description: "Успешный сценарий"
+          content:
+            application/json:
+              schema:
+                $ref: "components/response/IdResponse.yaml"
+              example:
+                id: 123132
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: Authorization
+      in: header
